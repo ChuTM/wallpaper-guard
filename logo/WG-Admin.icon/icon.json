@@ -1,0 +1,33 @@
+{
+  "fill" : {
+    "automatic-gradient" : "display-p3:1.00000,0.33716,0.34521,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "Host.png",
+          "name" : "Host",
+          "position" : {
+            "scale" : 0.81,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : "shared"
+  }
+}
