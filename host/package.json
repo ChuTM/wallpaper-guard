@@ -1,0 +1,51 @@
+{
+	"name": "wallpaper-guard-admin",
+	"version": "1.0.0",
+	"description": "Admin control panel for Wallpaper Guard.",
+	"main": "main.js",
+	"scripts": {
+		"start": "electron .",
+		"dist": "electron-builder"
+	},
+	"build": {
+		"appId": "chutm.wallpaper-guard.admin.app",
+		"productName": "Wallpaper Guard Admin",
+		"directories": {
+			"output": "dist"
+		},
+		"mac": {
+			"identity": "-",
+			"category": "public.app-category.utilities",
+			"target": [
+				"dmg"
+			],
+			"hardenedRuntime": true,
+			"gatekeeperAssess": false
+		},
+		"dmg": {
+			"contents": [
+				{
+					"x": 410,
+					"y": 150,
+					"type": "link",
+					"path": "/Applications"
+				},
+				{
+					"x": 130,
+					"y": 150,
+					"type": "file"
+				}
+			]
+		}
+	},
+	"author": "Chu Tsz Ming",
+	"license": "UNLICENSED",
+	"dependencies": {
+		"express": "^4.18.2",
+		"socket.io": "^4.7.2"
+	},
+	"devDependencies": {
+		"electron": "^41.2.0",
+		"electron-builder": "^26.8.1"
+	}
+}

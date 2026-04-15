@@ -1,0 +1,44 @@
+{
+	"name": "wallpaper-guard",
+	"version": "1.0.0",
+	"description": "A utility to monitor and protect desktop wallpapers.",
+	"main": "main.js",
+	"scripts": {
+		"start": "electron main.js",
+		"dist": "electron-builder"
+	},
+	"build": {
+		"appId": "chutm.wallpaper-guard.client.app",
+		"productName": "Wallpaper Guard",
+		"directories": {
+			"output": "dist"
+		},
+		"mac": {
+			"identity": "-",
+			"category": "public.app-category.utilities",
+			"target": [
+				"dmg"
+			],
+			"hardenedRuntime": true,
+			"gatekeeperAssess": false
+		},
+		"dmg": {
+			"contents": [
+				{ "x": 410, "y": 150, "type": "link", "path": "/Applications" },
+				{ "x": 130, "y": 150, "type": "file" }
+			]
+		}
+	},
+	"author": "Chu Tsz Ming",
+	"license": "UNLICENSED",
+	"dependencies": {
+		"electron-prompt": "^1.7.0",
+		"electron-store": "^11.0.2",
+		"socket.io": "^4.8.3",
+		"socket.io-client": "^4.8.3"
+	},
+	"devDependencies": {
+		"electron": "^41.2.0",
+		"electron-builder": "^26.8.1"
+	}
+}
