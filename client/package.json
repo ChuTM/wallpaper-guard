@@ -14,6 +14,7 @@
 			"output": "dist"
 		},
 		"mac": {
+			"icon": "res/logo.icns",
 			"identity": "-",
 			"category": "public.app-category.utilities",
 			"target": [
@@ -23,9 +24,19 @@
 			"gatekeeperAssess": false
 		},
 		"dmg": {
+			"icon": "res/logo.icns",
 			"contents": [
-				{ "x": 410, "y": 150, "type": "link", "path": "/Applications" },
-				{ "x": 130, "y": 150, "type": "file" }
+				{
+					"x": 410,
+					"y": 150,
+					"type": "link",
+					"path": "/Applications"
+				},
+				{
+					"x": 130,
+					"y": 150,
+					"type": "file"
+				}
 			]
 		}
 	},
