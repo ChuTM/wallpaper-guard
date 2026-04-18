@@ -78,6 +78,8 @@ Both applications are configured with `electron-builder`. To generate a `.dmg` f
 
 ```bash
 # In either /host or /client
+npm prune --production
+
 npm run dist
 ```
 
