@@ -108,11 +108,11 @@ app.whenReady().then(() => {
     // Initialize the tray with your icon
     tray = new Tray(icon);
     
-    // If you want the icon to change colors automatically in Dark Mode (macOS), 
+    // to change colors automatically in Dark Mode,
     // ensure the file is named iconTemplate.png and use:
     // icon.setTemplateImage(true);
 
-    // Optional: Tooltip when hovering over the icon
+    // Tooltip when hovering over the icon
     tray.setToolTip("Wallpaper Guard");
 
     connectSocket();

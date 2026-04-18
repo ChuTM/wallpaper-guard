@@ -13,18 +13,13 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 
-// --- Configuration & Paths ---
+// Configuration & Paths
 let tray = null;
 let mainWindow = null;
 const PORT = 7100;
 
 let allow_config = false;
 
-/**
- * PATH STRATEGY:
- * 1. STATIC_RES_PATH: Inside the app bundle (Read-Only). Use for HTML, icons, etc.
- * 2. DATA_RES_PATH: In the System AppData folder (Writable). Use for JSON history.
- */
 const STATIC_RES_PATH = path.join(__dirname, "res");
 const DATA_RES_PATH = path.join(app.getPath("userData"), "data");
 const HISTORY_FILE = path.join(DATA_RES_PATH, "device_history.json");
@@ -42,7 +37,7 @@ if (process.platform === "darwin") {
 	app.dock.hide();
 }
 
-// --- Load Persistence ---
+// Load Persistence
 if (fs.existsSync(HISTORY_FILE)) {
 	try {
 		deviceHistory = JSON.parse(fs.readFileSync(HISTORY_FILE, "utf8"));
@@ -60,7 +55,7 @@ const saveHistory = () => {
 	}
 };
 
-// --- Middleware: Localhost Restriction ---
+// Middleware: Localhost Restriction
 function restrictToLocalhost(req, res, next) {
 	const remoteAddress = req.socket.remoteAddress;
 	const isLocalhost =
@@ -77,7 +72,7 @@ function restrictToLocalhost(req, res, next) {
 	next();
 }
 
-// --- Express & Socket Server ---
+// Express & Socket Server
 const expressApp = express();
 const server = http.createServer(expressApp);
 const io = new Server(server, {
@@ -127,7 +122,7 @@ expressApp.get("/server", (req, res) => {
 	res.send("127.0.0.1");
 });
 
-// --- Socket Logic ---
+// Socket Logic
 io.on("connection", (socket) => {
 	socket.on("register-mac", (macUsername) => {
 		io.emit("admin-change", allow_config);
@@ -162,7 +157,7 @@ server.listen(PORT, "0.0.0.0", () => {
 	console.log(`Server running on port ${PORT}`);
 });
 
-// --- Electron UI ---
+// Electron UI
 
 function showWindow() {
 	if (!mainWindow) {
