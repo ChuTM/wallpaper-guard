@@ -1,6 +1,6 @@
 {
 	"name": "wallpaper-guard",
-	"version": "1.0.0",
+	"version": "1.0.3",
 	"description": "A utility to monitor and protect desktop wallpapers.",
 	"main": "main.js",
 	"scripts": {
