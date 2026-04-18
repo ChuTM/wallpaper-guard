@@ -145,3 +145,5 @@ vite.config.ts.timestamp-*
 
 # System Files
 .DS_STORE
+
+device_history.json
