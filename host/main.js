@@ -209,6 +209,15 @@ function createTray() {
 app.whenReady().then(() => {
 	showWindow();
 	createTray();
+	function setAutoLaunch(enabled) {
+		app.setLoginItemSettings({
+			openAtLogin: enabled,
+			openAsHidden: true,
+			path: app.getPath("exe"),
+		});
+	}
+
+	setAutoLaunch(true);
 });
 
 app.on("window-all-closed", () => {
