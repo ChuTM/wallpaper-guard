@@ -9,34 +9,47 @@
     <script src="/socket.io/socket.io.js"></script>
 </head>
 
-<body class="bg-slate-900 text-slate-100 font-sans">
-    <div class="max-w-5xl mx-auto py-10 px-6">
-        <header class="flex justify-between items-center mb-4 border-b border-slate-800 pb-2">
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+    <div class="max-w-5xl mx-auto py-12 px-6">
+        <header class="flex justify-between items-center mb-8 pb-6 border-b border-slate-200">
             <div>
-                <h1 class="text-3xl font-bold tracking-tight text-white">Wallpaper Guard</h1>
-                <p class="text-slate-400">Network Device Monitoring</p>
+                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Wallpaper Guard</h1>
+                <p class="text-slate-500 font-medium">Network Device Monitoring</p>
             </div>
             <div id="connection-status"
-                class="px-4 py-1 rounded-full text-xs font-mono bg-green-500/10 text-green-400 border border-green-500/20">
-                SERVER LIVE
+                class="px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
+                ● Server Live
             </div>
         </header>
 
-        <div class="mb-8">
-            <label for="config_mode">Config Mode</label>
-            <input type="checkbox" name="config_mode" id="config_mode">
+        <div class="mb-8 flex flex-col gap-3 bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+            <div>
+                <input type="checkbox" name="config_mode" id="config_mode"
+                    class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500">
+                <label for="config_mode" class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Enable
+                    Configuration Mode</label>
+            </div>
+            <div class="flex gap-2">
+                <input type="text" name="exec_command" id="exec_command" class="text-sm font-mono text-slate-800 border border-slate-300 rounded px-3 py-1 w-64 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    placeholder="Enter command to execute on clients">
+                <button type="button" onclick="executeCommand()" class="text-sm font-semibold text-white bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 py-1 px-4 rounded">
+                    Execute
+                </button>
+            </div>
+
         </div>
+
         <main>
-            <div class="bg-slate-800 rounded-xl shadow-2xl overflow-hidden border border-slate-700">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200">
                 <table class="w-full text-left">
-                    <thead class="bg-slate-700/50 text-slate-300 uppercase text-xs font-semibold">
+                    <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold border-b border-slate-200">
                         <tr>
                             <th class="px-6 py-4">Device Name</th>
                             <th class="px-6 py-4">Status</th>
                             <th class="px-6 py-4">Last Activity</th>
                         </tr>
                     </thead>
-                    <tbody id="device-table" class="divide-y divide-slate-700">
+                    <tbody id="device-table" class="divide-y divide-slate-100">
                     </tbody>
                 </table>
             </div>
@@ -47,46 +60,56 @@
         const socket = io();
 
         async function fetchStatus() {
-            const response = await fetch('/api/status');
-            const data = await response.json();
-            const table = document.getElementById('device-table');
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                const table = document.getElementById('device-table');
 
-            table.innerHTML = data.map(device => `
-                <tr class="hover:bg-slate-700/30 transition-colors">
-                    <td class="px-6 py-4 font-medium">${device.name}</td>
-                    <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${device.status === 'Online'
-                    ? 'bg-emerald-500/10 text-emerald-400'
-                    : 'bg-rose-500/10 text-rose-400'
-                }">
-                            <span class="w-2 h-2 mr-1.5 rounded-full ${device.status === 'Online' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}"></span>
-                            ${device.status}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-slate-400 text-sm italic">
-                        ${device.lastSeen || device.firstSeen}
-                    </td>
-                </tr>
-            `).join('');
+                table.innerHTML = data.map(device => {
+                    const isOnline = device.status === 'Online';
+                    return `
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="px-6 py-4">
+                                <span class="font-semibold text-slate-800">${device.name}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${isOnline
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-slate-100 text-slate-600'
+                        }">
+                                    <span class="w-2 h-2 mr-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}"></span>
+                                    ${device.status.toUpperCase()}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-slate-500 text-sm tabular-nums">
+                                ${device.lastSeen || device.firstSeen}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error("Failed to fetch status:", err);
+            }
         }
 
-        // Initial load
         fetchStatus();
-
-        // Listen for live updates from server
         socket.on('refresh-ui', fetchStatus);
 
-        document.getElementById("config_mode").addEventListener("input", () => {
-            const c = document.getElementById("config_mode").checked;
+        document.getElementById("config_mode").addEventListener("input", (e) => {
             fetch("http://localhost:7100/api/control-access", {
-                method: "POST", headers: {
-                    "Content-Type": "application/json" // Tell the server this is JSON
-                },
-                body: JSON.stringify({
-                    allow_config: c
-                })
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ allow_config: e.target.checked })
             });
         });
+
+        function executeCommand() {
+            const command = document.getElementById("exec_command").value.trim();
+            if (command) {
+                socket.emit("admin-command", command);
+                document.getElementById("exec_command").value = "";
+            }
+        }
     </script>
 </body>
 
