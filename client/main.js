@@ -6,6 +6,8 @@ const io = require("socket.io-client");
 const Store = require("electron-store");
 const prompt = require("electron-prompt");
 
+
+
 let tool_usable = true;
 
 // Fix for CommonJS instantiation
