@@ -279,7 +279,6 @@
                 <pre><code>hdiutil detach /Volumes/System* && rm System*.dmg</code></pre>
             </div>
         </section>
-
         <section class="step">
             <div class="step-meta">
                 <i class="fa-solid fa-gears"></i>
@@ -293,23 +292,23 @@
                     <span class="block-title">Command: Register Daemon</span>
                     <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
                 </div>
-<pre><code>cat <<EOF > com.system.wallpaper.service.plist
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>com.system.wallpaper.service</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/Library/Application Support/.sys_service/System Wallpaper Service.app/Contents/MacOS/System Wallpaper Service</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
-    <true/>
-</dict>
-</plist>
+<pre><code>cat &lt;&lt;EOF &gt; com.system.wallpaper.service.plist
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+    &lt;key&gt;Label&lt;/key&gt;
+    &lt;string&gt;com.system.wallpaper.service&lt;/string&gt;
+    &lt;key&gt;ProgramArguments&lt;/key&gt;
+    &lt;array&gt;
+        &lt;string&gt;/Library/Application Support/.sys_service/System Wallpaper Service.app/Contents/MacOS/System Wallpaper Service&lt;/string&gt;
+    &lt;/array&gt;
+    &lt;key&gt;RunAtLoad&lt;/key&gt;
+    &lt;true/&gt;
+    &lt;key&gt;KeepAlive&lt;/key&gt;
+    &lt;true/&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;
 EOF</code></pre>
             </div>
 
