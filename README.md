@@ -2,6 +2,10 @@
 
 A centralized management system for macOS desktop wallpapers. This project consists of a **Host (Admin)** application and a **Client** application designed to enforce a standard desktop background across multiple macOS devices in a network.
 
+## Quick Download & Installation
+
+[Check Download Page](https://wallpg.web.app/)
+
 ## Project Structure
 
 The repository is divided into two main components:
@@ -39,7 +43,7 @@ The repository is divided into two main components:
 
 ---
 
-## 📦 Installation & Setup
+## 📦 Development Installation & Setup
 
 ### Prerequisites
 -   Node.js (v16 or higher)

