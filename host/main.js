@@ -1,17 +1,21 @@
-const {
+import {
 	app,
 	BrowserWindow,
 	Tray,
 	Menu,
 	nativeImage,
 	Notification,
-} = require("electron");
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-const fs = require("fs");
-const path = require("path");
-const os = require("os");
+} from "electron";
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import fs from "fs";
+import path from "path";
+import os from "os";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configuration & Paths
 let tray = null;
@@ -110,6 +114,33 @@ expressApp.post("/api/control-access", (req, res) => {
 	res.send(true);
 });
 
+expressApp.post("/api/execute-command", (req, res) => {
+	const command = req.body.command;
+	io.emit("admin-command", command);
+	res.send(true);
+});
+
+expressApp.post("/command-error", (req, res) => {
+	const error = req.body;
+	// console.error(`Command error from ${error.user}:`, error);
+	io.emit("admin-command-error", error);
+	res.send(true);
+});
+
+expressApp.post("/command-result", (req, res) => {
+	const { user, command, result } = req.body;
+	// console.log(`Command result from ${user}:`, { command, result });
+	io.emit("admin-command-result", { user, command, result });
+	res.send(true);
+});
+
+expressApp.post("/api/remove-history", (req, res) => {
+	const nameToRemove = req.body.deviceName;
+	deviceHistory = deviceHistory.filter((d) => d.name !== nameToRemove);
+	saveHistory();
+	res.send(true);
+});
+
 expressApp.get("/server", (req, res) => {
 	const interfaces = os.networkInterfaces();
 	for (const name of Object.keys(interfaces)) {
@@ -121,6 +152,8 @@ expressApp.get("/server", (req, res) => {
 	}
 	res.send("127.0.0.1");
 });
+
+expressApp.use(express.static(STATIC_RES_PATH));
 
 // Socket Logic
 io.on("connection", (socket) => {

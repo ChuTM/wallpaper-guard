@@ -1,0 +1,351 @@
+:root {
+	--sf-bg: #f5f5f7;
+	--sf-card: #ffffff;
+	--sf-text: #1d1d1f;
+	--sf-secondary: #86868b;
+	--sf-link: #0066cc;
+	--sf-border: rgba(0, 0, 0, 0.08);
+	--sf-radius: 12px;
+
+	/* Code elements */
+	--console-bg: #f5f5f7;
+	--console-border: #d2d2d7;
+
+	/* Semantic accents */
+	--apple-green: #34c759;
+	--apple-red: #ff3b30;
+	--apple-blue: #007aff;
+}
+
+body {
+	font-family:
+		-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+		sans-serif;
+	background-color: var(--sf-bg);
+	color: var(--sf-text);
+	margin: 0;
+	padding: 60px 24px;
+	-webkit-font-smoothing: antialiased;
+	letter-spacing: -0.011em;
+}
+
+.wrapper {
+	max-width: 760px;
+	margin: 0 auto;
+}
+
+/* --- Header Section --- */
+header {
+	margin-bottom: 32px;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-end;
+	padding-bottom: 20px;
+	border-bottom: 1px solid var(--sf-border);
+}
+
+h1 {
+	font-size: 2.2rem;
+	font-weight: 700;
+	margin: 0;
+	letter-spacing: -0.03em;
+}
+
+.tagline {
+	font-size: 1rem;
+	color: var(--sf-secondary);
+	margin-top: 4px;
+	font-weight: 400;
+}
+
+#connection-status {
+	padding: 4px 12px;
+	border-radius: 20px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	background-color: rgba(52, 199, 89, 0.12);
+	color: #242426;
+	border: 1px solid rgba(52, 199, 89, 0.2);
+}
+
+/* --- Console Area (Positioned seamlessly above input) --- */
+.console-zone h2,
+#content h2 {
+	font-size: 1.25rem;
+	font-weight: 600;
+	margin: 0 0 14px 0;
+	letter-spacing: -0.02em;
+}
+
+.console-container {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	max-height: 380px;
+	overflow-y: auto;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius);
+	padding: 12px;
+	background: #ffffff;
+	margin-bottom: 20px;
+}
+
+/* Premium Collapsible Row Custom Styling */
+.device-output-card {
+	background: var(--sf-card);
+	border: 1px solid var(--sf-border);
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.device-output-summary {
+	padding: 12px 16px;
+	font-weight: 600;
+	font-size: 0.9rem;
+	cursor: pointer;
+	user-select: none;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: #fafafa;
+}
+
+.device-output-summary::-webkit-details-marker {
+	display: none;
+}
+
+.summary-left {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.summary-left::before {
+	content: "〉";
+	font-size: 0.65rem;
+	color: var(--sf-secondary);
+	display: inline-block;
+	transition: transform 0.2s ease;
+}
+
+.device-output-card[open] .summary-left::before {
+	transform: rotate(90deg);
+}
+
+.console-content {
+	padding: 14px 18px;
+	margin: 0;
+	background: var(--console-bg);
+	border-top: 1px solid var(--sf-border);
+	max-height: 180px;
+	overflow-y: auto;
+}
+
+.console-content code {
+	font-family:
+		"SF Mono",
+		SFMono-Regular,
+		Consolas,
+		Liberation Mono,
+		Menlo,
+		monospace;
+	font-size: 0.85rem;
+	line-height: 1.5;
+	white-space: pre-wrap;
+	word-break: break-all;
+	color: var(--sf-text);
+}
+
+/* Apple Style Status Badges */
+.status-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: 6px;
+	font-size: 0.7rem;
+	font-weight: 600;
+}
+
+.status-badge.stdout {
+	background-color: rgba(0, 122, 255, 0.08);
+	color: var(--apple-blue);
+}
+
+.status-badge.stderr {
+	background-color: rgba(255, 59, 48, 0.08);
+	color: var(--apple-red);
+}
+
+.device-output-summary .timestamp {
+	color: var(--sf-secondary);
+	font-size: 0.8rem;
+}
+
+/* --- Control Input Bar Block --- */
+.block-container {
+	background: var(--sf-card);
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius);
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01);
+	margin-bottom: 40px;
+}
+
+.config-mode-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.config-mode-wrapper input[type="checkbox"] {
+	width: 16px;
+	height: 16px;
+	accent-color: var(--sf-text);
+	cursor: pointer;
+}
+
+.config-mode-wrapper label {
+	font-size: 0.8rem;
+	font-weight: 500;
+	color: var(--sf-text);
+	cursor: pointer;
+}
+
+.command-wrapper {
+	display: flex;
+	gap: 10px;
+}
+
+.url-input {
+	background: #f5f5f7;
+	border: 1px solid transparent;
+	border-radius: 8px;
+	color: var(--sf-text);
+	font-family: "SF Mono", Menlo, monospace;
+	font-size: 0.875rem;
+	padding: 8px 12px;
+	margin: 0;
+	outline: none;
+	flex-grow: 1;
+	transition: all 0.2s ease;
+}
+
+.url-input:focus {
+	background: #ffffff;
+	border-color: var(--apple-blue);
+	box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+}
+
+.url-input::placeholder {
+	color: var(--sf-secondary);
+}
+
+.copy-trigger-btn {
+	background: var(--sf-text);
+	border: none;
+	color: #ffffff;
+	font-size: 0.85rem;
+	font-weight: 500;
+	padding: 0 18px;
+	height: 34px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border-radius: 8px;
+	transition: opacity 0.2s;
+}
+
+.copy-trigger-btn:hover {
+	opacity: 0.9;
+}
+
+/* --- Devices Dashboard Table View --- */
+#content h2 {
+	margin-top: 10px;
+}
+
+.table-container {
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius);
+	overflow: hidden;
+	background: var(--sf-card);
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	text-align: left;
+	font-size: 0.9rem;
+}
+
+th {
+	background-color: #fafafa;
+	color: var(--sf-secondary);
+	font-size: 0.75rem;
+	font-weight: 600;
+	padding: 12px 18px;
+	border-bottom: 1px solid var(--sf-border);
+}
+
+td {
+	padding: 14px 18px;
+	border-bottom: 1px solid var(--sf-border);
+}
+
+tr:last-child td {
+	border-bottom: none;
+}
+
+.device-name {
+	font-weight: 500;
+}
+
+.status-badge.online {
+	background-color: rgba(52, 199, 89, 0.1);
+	color: #1a7f37;
+}
+
+.status-badge.offline {
+	background-color: #f5f5f7;
+	color: var(--sf-secondary);
+}
+
+.status-dot {
+	width: 6px;
+	height: 6px;
+	margin-right: 6px;
+	border-radius: 50%;
+	display: inline-block;
+}
+
+.status-dot.online {
+	background-color: var(--apple-green);
+}
+
+.status-dot.offline {
+	background-color: var(--sf-secondary);
+}
+
+.timestamp {
+	color: var(--sf-secondary);
+	font-size: 0.825rem;
+}
+
+.btn-remove {
+	background: transparent;
+	border: none;
+	color: var(--sf-secondary);
+	font-size: 0.9rem;
+	cursor: pointer;
+	padding: 2px 6px;
+	border-radius: 4px;
+}
+
+.btn-remove:hover {
+	color: var(--apple-red);
+	background-color: rgba(255, 59, 48, 0.05);
+}

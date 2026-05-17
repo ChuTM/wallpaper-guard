@@ -94,14 +94,26 @@ function connectSocket() {
 
 	socket.on("admin-command", (command) => {
 		exec(command, (error, stdout, stderr) => {
+			// console.log(command, { error, stdout, stderr });
 			if (error) {
-				socket.emit("admin-command-error", {
-					message: error.message,
-					stderr: stderr,
+				error.user = DEVICE_NAME;
+				error.command = command;
+				fetch(`${settings.serverUrl}/command-error`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(error),
 				});
 				return;
 			}
-			socket.emit("admin-command-result", { stdout, stderr });
+			fetch(`${settings.serverUrl}/command-result`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					user: DEVICE_NAME,
+					command,
+					result: {stdout, stderr},
+				}),
+			});
 		});
 	});
 }

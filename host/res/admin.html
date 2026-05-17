@@ -5,112 +5,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wallpaper Guard | Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for the Header Section Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="/style.css">
 </head>
 
-<body class="bg-slate-50 text-slate-900 font-sans antialiased">
-    <div class="max-w-5xl mx-auto py-12 px-6">
-        <header class="flex justify-between items-center mb-8 pb-6 border-b border-slate-200">
+<body>
+    <div class="wrapper">
+        <header>
             <div>
-                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Wallpaper Guard</h1>
-                <p class="text-slate-500 font-medium">Network Device Monitoring</p>
+                <h1>Wallpaper Guard</h1>
+                <div class="tagline">Network Device Monitoring</div>
             </div>
-            <div id="connection-status"
-                class="px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
+            <div id="connection-status">
                 ● Server Live
             </div>
         </header>
 
-        <div class="mb-8 flex flex-col gap-3 bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
-            <div>
-                <input type="checkbox" name="config_mode" id="config_mode"
-                    class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500">
-                <label for="config_mode" class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Enable
-                    Configuration Mode</label>
+        <!-- Functional Admin Form Panel Control Interface block -->
+        <div class="block-container">
+            <div class="config-mode-wrapper">
+                <input type="checkbox" name="config_mode" id="config_mode">
+                <label for="config_mode">Enable Configuration Mode</label>
             </div>
-            <div class="flex gap-2">
-                <input type="text" name="exec_command" id="exec_command" class="text-sm font-mono text-slate-800 border border-slate-300 rounded px-3 py-1 w-64 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                    placeholder="Enter command to execute on clients">
-                <button type="button" onclick="executeCommand()" class="text-sm font-semibold text-white bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 py-1 px-4 rounded">
+            <div class="command-wrapper">
+                <input type="text" name="exec_command" id="exec_command" class="url-input"
+                    placeholder="Enter command to execute on clients...">
+                <button type="button" onclick="executeCommand()" class="copy-trigger-btn">
                     Execute
                 </button>
             </div>
-
         </div>
 
-        <main>
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold border-b border-slate-200">
+        <main id="content">
+            <h2>Monitored Clients</h2>
+
+            <div class="table-container">
+                <table>
+                    <thead>
                         <tr>
-                            <th class="px-6 py-4">Device Name</th>
-                            <th class="px-6 py-4">Status</th>
-                            <th class="px-6 py-4">Last Activity</th>
+                            <th>Device Name</th>
+                            <th>Status</th>
+                            <th>Last Activity</th>
                         </tr>
                     </thead>
-                    <tbody id="device-table" class="divide-y divide-slate-100">
+                    <tbody id="device-table">
+                        <!-- Content injection point via JavaScript -->
                     </tbody>
                 </table>
             </div>
         </main>
     </div>
 
-    <script>
-        const socket = io();
-
-        async function fetchStatus() {
-            try {
-                const response = await fetch('/api/status');
-                const data = await response.json();
-                const table = document.getElementById('device-table');
-
-                table.innerHTML = data.map(device => {
-                    const isOnline = device.status === 'Online';
-                    return `
-                        <tr class="hover:bg-slate-50/80 transition-colors">
-                            <td class="px-6 py-4">
-                                <span class="font-semibold text-slate-800">${device.name}</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${isOnline
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : 'bg-slate-100 text-slate-600'
-                        }">
-                                    <span class="w-2 h-2 mr-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}"></span>
-                                    ${device.status.toUpperCase()}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-slate-500 text-sm tabular-nums">
-                                ${device.lastSeen || device.firstSeen}
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            } catch (err) {
-                console.error("Failed to fetch status:", err);
-            }
-        }
-
-        fetchStatus();
-        socket.on('refresh-ui', fetchStatus);
-
-        document.getElementById("config_mode").addEventListener("input", (e) => {
-            fetch("http://localhost:7100/api/control-access", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ allow_config: e.target.checked })
-            });
-        });
-
-        function executeCommand() {
-            const command = document.getElementById("exec_command").value.trim();
-            if (command) {
-                socket.emit("admin-command", command);
-                document.getElementById("exec_command").value = "";
-            }
-        }
-    </script>
+    <script src="/admin.script.js"></script>
 </body>
 
 </html>
