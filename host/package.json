@@ -1,6 +1,6 @@
 {
 	"name": "wallpaper-guard-admin",
-	"version": "1.2.1",
+	"version": "1.2.2",
 	"description": "Admin control panel for Wallpaper Guard.",
 	"main": "main.js",
 	"scripts": {

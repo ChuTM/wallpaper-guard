@@ -8,6 +8,12 @@ curl -L -O https://github.com/ChuTM/wallpaper-guard/releases/latest/download/Wal
 hdiutil attach Wallpaper.Guard-arm64.dmg
 :::
 
+Update `WP_CONFIG_URL` with the following command:
+
+:::cmd Set Config URL
+echo 'export WP_CONFIG_URL="https://___wallpg.web.app/init_config.json___"' >> ~/.zshrc && source ~/.zshrc
+:::
+
 ## Trust & Permission
 Transfer the service and strip quarantine attributes. The wildcard handles version-specific volume names automatically.
 

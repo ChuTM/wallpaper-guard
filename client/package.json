@@ -1,6 +1,6 @@
 {
 	"name": "com.system.wallpaper.service",
-	"version": "1.2.0",
+	"version": "1.2.2",
 	"description": "System Wallpaper Management Service",
 	"main": "main.js",
 	"productName": "System Wallpaper Service",
