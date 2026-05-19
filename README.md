@@ -2,9 +2,19 @@
 
 A centralized management system for macOS desktop wallpapers. This project consists of a **Host (Admin)** application and a **Client** application designed to enforce a standard desktop background across multiple macOS devices in a network.
 
+> [!NOTE]
+> **MacOS Required**: This app is designed for MacOS.
+
 ## Quick Download & Installation
 
+### For Clients
+
 [Check Download Page](https://wallpg.web.app/)
+
+### For Admin
+
+Download the latest release of `Wallpaper.Guard.Admin-...-arm64.dmg
+` from the [GitHub Releases](https://github.com/ChuTM/wallpaper-guard/releases) page and install like a regular Mac application.
 
 ## Project Structure
 
