@@ -10,7 +10,7 @@ function initializeConsoleLayout() {
 		consoleSection.id = "command-console-zone";
 		consoleSection.className = "console-zone";
 		consoleSection.innerHTML = `
-            <h2>Console Output</h2>
+            <h2>Console</h2>
             <div id="console-stream" class="console-container"></div>
         `;
 
@@ -59,11 +59,15 @@ async function fetchStatus() {
 }
 
 // Appends data incoming from backend arrays directly to standard viewport layouts
-function appendConsoleOutput(deviceName, payload, isError = false) {
+function appendConsoleOutput(deviceName, payload, isError = false, fullFallback = {}) {
 	const streamContainer = document.getElementById("console-stream");
 	if (!streamContainer) return;
 
-	const timestamp = new Date().toLocaleTimeString();
+	const timestamp = new Date().toLocaleTimeString([], {
+		hour: "2-digit",
+		minute: "2-digit",
+		second: "2-digit",
+	});
 	const cleanOutput =
 		typeof payload === "string"
 			? payload.trim()
@@ -71,32 +75,52 @@ function appendConsoleOutput(deviceName, payload, isError = false) {
 
 	if (!cleanOutput) return;
 
-    console.log(deviceName, { payload, isError });
+	console.log(deviceName, { payload, isError });
 
-	const outputCard = document.createElement("details");
-	outputCard.className = "device-output-card";
-	outputCard.open = true;
+	// Look for an existing device container using a sanitized ID
+	const safeId = `device-log-${deviceName.replace(/[^a-zA-Z0-9]/g, "-")}`;
+	let deviceCard = document.getElementById(safeId);
 
-	outputCard.innerHTML = `
-        <summary class="device-output-summary">
-            <div class="summary-left">
-                <span class="device-name">${deviceName}</span>
-                <span class="status-badge ${isError ? "stderr" : "stdout"}">
-                    ${isError ? "STDERR" : "STDOUT"}
-                </span>
-            </div>
-            <span class="timestamp">${timestamp}</span>
-        </summary>
-        <pre class="console-content"><code>${cleanOutput}</code></pre>
-    `;
+	// If the device card doesn't exist yet, create the overall wrapper structure
+	if (!deviceCard) {
+		deviceCard = document.createElement("details");
+		deviceCard.id = safeId;
+		deviceCard.className = "device-terminal-group";
+		deviceCard.open = true;
 
-	streamContainer.insertBefore(outputCard, streamContainer.firstChild);
+		deviceCard.innerHTML = `
+			<summary class="device-terminal-header">
+				<span class="header-icon">⌃</span>
+				<span class="device-title">${deviceName}</span>
+			</summary>
+			<div class="device-terminal-body"></div>
+		`;
+
+		// Insert newest devices at the top of the stream
+		streamContainer.insertBefore(deviceCard, streamContainer.firstChild);
+	}
+
+	// Target the internal body of the existing device panel
+	const terminalBody = deviceCard.querySelector(".device-terminal-body");
+
+	// Create the fresh multi-line command output block
+	const commandBlock = document.createElement("div");
+	commandBlock.className = `terminal-command-entry ${isError ? "has-error" : ""}`;
+	commandBlock.innerHTML = `
+		<div class="command-meta">[${timestamp}] &gt; ${fullFallback?.command || ""} ${isError ? "ERR" : "OUT"}</div>
+		<pre class="command-payload"><code>${cleanOutput}</code></pre>
+	`;
+
+	// Append the new command linearly at the bottom of this specific device's card
+	terminalBody.appendChild(commandBlock);
 }
 
 // Lifecycle Init hooks
 document.addEventListener("DOMContentLoaded", () => {
 	initializeConsoleLayout();
 	fetchStatus();
+	serverAddress();
+	listenForCommands();
 });
 
 socket.on("refresh-ui", fetchStatus);
@@ -104,34 +128,33 @@ socket.on("refresh-ui", fetchStatus);
 // Real-time server socket event stream processing unpacking array structure maps safely
 socket.on("admin-command-result", (data) => {
 	// Structural validation to verify array wrapper payload formatting types cleanly
-    console.log(data);
+	console.log(data);
 
-    if (!data || typeof data !== "object") {
-        console.warn("Received malformed command result:", data);
-        return;
-    }
+	if (!data || typeof data !== "object") {
+		console.warn("Received malformed command result:", data);
+		return;
+	}
 
-    appendConsoleOutput(data.user || "Unknown Device", data.result?.stdout || "No output", false);
-    if (data.result?.stderr) {
-        appendConsoleOutput(data.user || "Unknown Device", data.result.stderr, true);
-    }
-    
-
-//     {
-//     "user": "retrn",
-//     "command": "echo \"hi\"",
-//     "result": {
-//         "stdout": "hi\n",
-//         "stderr": ""
-//     }
-// }
-
+	appendConsoleOutput(
+		data.user || "Unknown Device",
+		data.result?.stdout || "No output",
+		false,
+		data[0]
+	);
+	if (data.result?.stderr) {
+		appendConsoleOutput(
+			data.user || "Unknown Device",
+			data.result.stderr,
+			true,
+			data[0]
+		);
+	}
 });
 
 socket.on("admin-command-error", (error) => {
 	const name = error.deviceName || "System Network Error";
 	const msg = error.message || JSON.stringify(error);
-	appendConsoleOutput(name, msg, true);
+	appendConsoleOutput(name, msg, true, error);
 });
 
 // Print all socket events for debugging
@@ -171,10 +194,19 @@ function executeCommand() {
 			})
 			.catch((err) => {
 				console.error(err);
-				appendConsoleOutput("Admin System", err.message, true);
+				appendConsoleOutput("Admin System", err.message, true, err);
 			});
 		commandInput.value = "";
 	}
+}
+
+function listenForCommands() {
+	document.getElementById("exec_command").addEventListener("keydown", (e) => {
+		if (e.key === "Enter" && e.metaKey) {
+			e.preventDefault();
+			executeCommand();
+		}
+	});
 }
 
 function removeConnectionHistory(deviceName) {
@@ -200,4 +232,24 @@ function removeConnectionHistory(deviceName) {
 			alert(`Failed to remove connection history for ${deviceName}`);
 			socket.emit("refresh-ui");
 		});
+}
+
+
+function serverAddress() {
+	fetch ("/server").then(res => res.text()).then(address => {
+		const addr_el = document.getElementById("server-address");
+		addr_el.textContent = address + ':7100';
+		addr_el.addEventListener("click", () => {
+			copy(address + ':7100');
+			addr_el.classList.add("copied");
+			setTimeout(() => {
+				addr_el.classList.remove("copied");
+			}, 500);
+			socket.emit("refresh-ui");
+		});
+	});
+}
+
+function copy(textToCopy) {
+	navigator.clipboard.writeText(textToCopy);
 }

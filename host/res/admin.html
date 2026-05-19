@@ -5,25 +5,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wallpaper Guard | Admin</title>
-    <!-- Font Awesome for the Header Section Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
+    <div id="title-bar"></div>
     <div class="wrapper">
         <header>
             <div>
-                <h1>Wallpaper Guard</h1>
-                <div class="tagline">Network Device Monitoring</div>
+                <h1><img src="/icon.png" alt="Logo" class="header-logo">Wallpaper Guard (Admin)</h1>
+                <div class="tagline"><i data-lucide="shield-check"></i>
+                    System Service Deployment & Client Management
+                </div>
             </div>
             <div id="connection-status">
-                ● Server Live
+                ● Server Live at
+                <u id="server-address"></u>
             </div>
         </header>
-
-        <!-- Functional Admin Form Panel Control Interface block -->
         <div class="block-container">
             <div class="config-mode-wrapper">
                 <input type="checkbox" name="config_mode" id="config_mode">
@@ -33,7 +33,9 @@
                 <input type="text" name="exec_command" id="exec_command" class="url-input"
                     placeholder="Enter command to execute on clients...">
                 <button type="button" onclick="executeCommand()" class="copy-trigger-btn">
-                    Execute
+                    <i data-lucide="command"></i>
+                    <span style="color: rgba(255, 255, 255, 0.5); margin: 0 .2rem;">+</span>
+                    <i data-lucide="corner-down-left"></i>
                 </button>
             </div>
         </div>
@@ -51,13 +53,43 @@
                         </tr>
                     </thead>
                     <tbody id="device-table">
-                        <!-- Content injection point via JavaScript -->
                     </tbody>
                 </table>
             </div>
         </main>
     </div>
 
+
+    <div class="copyright">
+        <div class="links">
+            <a href="https://github.com/ChuTM/wallpaper-guard/">
+                View on GitHub
+            </a>
+            <a href="https://wallpg.web.app/">
+                View Documentation
+            </a>
+        </div>
+        <p>
+            &copy; 2026 Chu Tsz Ming. All rights reserved.
+        </p>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons({
+            attrs: {
+                class: 'lucide-icon',
+                'stroke-width': 1.5,
+            }
+        });
+
+        const titleBar = document.getElementById('title-bar');
+
+        titleBar.addEventListener('dblclick', () => {
+            // Call the safely exposed API from the preload script
+            window.electronAPI.handleDoubleClick();
+        });
+    </script>
     <script src="/admin.script.js"></script>
 </body>
 

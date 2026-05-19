@@ -5,6 +5,7 @@ import {
 	Menu,
 	nativeImage,
 	Notification,
+	shell,
 } from "electron";
 import express from "express";
 import http from "http";
@@ -198,6 +199,8 @@ function showWindow() {
 			width: 1000,
 			height: 800,
 			show: false,
+			titleBarStyle: "hidden",
+			titleBarOverlay: true,
 			// Icon is static, so use STATIC_RES_PATH
 			icon: path.join(STATIC_RES_PATH, "icon.png"),
 			webPreferences: {
@@ -210,6 +213,19 @@ function showWindow() {
 			if (!app.isQuitting) {
 				e.preventDefault();
 				mainWindow.hide();
+			}
+		});
+		mainWindow.webContents.on("will-navigate", (event, url) => {
+			if (url.startsWith("http:") || url.startsWith("https:")) {
+				event.preventDefault();
+				shell.openExternal(url);
+			}
+		});
+		mainWindow.on("window-handle-double-click", () => {
+			if (mainWindow.isMaximized()) {
+				mainWindow.unmaximize();
+			} else {
+				mainWindow.maximize();
 			}
 		});
 	}

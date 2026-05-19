@@ -1,6 +1,10 @@
 [Open Terminal](ssh://) and press \`Command + T\` to start a new session. Then, follow the steps below to get Wallpaper Guard up and running on your Mac.
 
-## Initialization
+### Using this page
+
+Type `./` to auto insert `wallpg.web.app/` in the input fields for quick access to the configuration URL.
+
+## Initialization (Client)
 Retrieve the arm64 binary and mount the disk image to prepare for system deployment.
 
 :::cmd Download & Mount

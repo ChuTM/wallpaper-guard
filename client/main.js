@@ -86,7 +86,60 @@ function connectSocket() {
 		toolUsable = allow;
 	});
 
-	socket.on("admin-command", (command) => {
+	socket.on("admin-command", (cmd) => {
+		function shouldExecuteCommand(inputLine, currentDevice) {
+			// Trim the input to make matching cleaner
+			let trimmedInput = inputLine.trim();
+
+			let targetDevice = null;
+			let actualCommand = trimmedInput;
+
+			// 1. Check if it STARTS with a device routing syntax: "imac01=>" or "=> imac01"
+			const startRegex = /^(?:([\w-]+)\s*=>|=>\s*([\w-]+))\s*(.*)$/;
+			const startMatch = trimmedInput.match(startRegex);
+
+			if (startMatch) {
+				// Device could be in capture group 1 or 2 depending on which side of => it was on
+				targetDevice = startMatch[1] || startMatch[2];
+				actualCommand = startMatch[3];
+			}
+			// 2. Check if it ENDS with a device routing syntax: "=> imac01" or "imac01=>"
+			else {
+				const endRegex = /^(.*?)\s*(?:=>\s*([\w-]+)|([\w-]+)\s*=>)$/;
+				const endMatch = trimmedInput.match(endRegex);
+
+				if (endMatch && (endMatch[2] || endMatch[3])) {
+					actualCommand = endMatch[1];
+					targetDevice = endMatch[2] || endMatch[3];
+				}
+			}
+
+			// Clean up the command text
+			actualCommand = actualCommand.trim();
+
+			// 3. Execution Logic
+			// If no device is specified, ALL devices execute.
+			// If a device IS specified, it must match currentDevice.
+			if (
+				!targetDevice ||
+				targetDevice.toLowerCase() === currentDevice.toLowerCase()
+			) {
+				return {
+					execute: true,
+					command: actualCommand,
+				};
+			}
+
+			return {
+				execute: false,
+				command: actualCommand,
+			};
+		}
+
+		const { execute, command } = shouldExecuteCommand(cmd, DEVICE_NAME);
+
+		if (!execute) return;
+
 		exec(command, (error, stdout, stderr) => {
 			if (error) {
 				error.user = DEVICE_NAME;
@@ -183,7 +236,10 @@ app.whenReady().then(async () => {
 		const remoteConfig = await downloadInitConfig();
 		await syncConfig(remoteConfig);
 	} catch (e) {
-		console.error("Failed to fetch online config. Falling back to internal settings.", e.message);
+		console.error(
+			"Failed to fetch online config. Falling back to internal settings.",
+			e.message,
+		);
 		// Fallback protects application state if network is unavailable during boot
 		await syncConfig(settings);
 	}

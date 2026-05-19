@@ -25,8 +25,7 @@ fetch("./markdown/quick_download.md")
                         placeholder='${placeholderText}' 
                         class='url-input' 
                         data-default='${placeholderText}'
-                        size='${initialLength}'
-                        oninput="this.size = Math.max(this.value.length, this.getAttribute('data-default').length)" />`;
+                        size='${initialLength}' />`;
 						},
 					);
 
@@ -60,7 +59,26 @@ fetch("./markdown/quick_download.md")
 		document.getElementById("content").innerHTML =
 			marked.parse(targetedMarkdown);
 
-		// Standard Copy Functionality Execution
+		document.querySelectorAll(".url-input").forEach((input) => {
+			input.addEventListener("input", function () {
+				this.size = Math.max(
+					this.value.length,
+					this.getAttribute("data-default").length,
+				);
+
+				this.value = this.value.trim(); // Trim whitespace
+				this.value = [
+					["https://", ""],
+					["http://", ""],
+					["./", "wallpg.web.app/"],
+				].reduce((val, [prefix, replacement]) => {
+					if (val.startsWith(prefix)) {
+						return replacement + val.slice(prefix.length);
+					}
+					return val;
+				}, this.value);
+			});
+		});
 	});
 
 function copy(el) {
