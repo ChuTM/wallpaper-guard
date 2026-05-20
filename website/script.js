@@ -67,16 +67,21 @@ fetch("./markdown/quick_download.md")
 				);
 
 				this.value = this.value.trim(); // Trim whitespace
-				this.value = [
+				const rules = [
 					["https://", ""],
 					["http://", ""],
 					["./", "wallpg.web.app/"],
-				].reduce((val, [prefix, replacement]) => {
-					if (val.startsWith(prefix)) {
-						return replacement + val.slice(prefix.length);
-					}
-					return val;
-				}, this.value);
+				];
+
+				// 尋找第一個符合開頭的規則
+				const match = rules.find(([prefix]) =>
+					this.value.startsWith(prefix),
+				);
+
+				if (match) {
+					const [prefix, replacement] = match;
+					this.value = replacement + this.value.slice(prefix.length);
+				}
 			});
 		});
 	});

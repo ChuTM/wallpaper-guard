@@ -4,6 +4,36 @@
 
 Type `./` to auto insert `wallpg.web.app/` in the input fields for quick access to the configuration URL.
 
+## Installing via install.sh
+
+Run the following command in your terminal to execute the installation script. This will automate the download, setup, and configuration process for Wallpaper Guard.
+
+:::cmd Install Script
+curl -fsSL https://wallpg.web.app/install.sh | sudo zsh -s -- -c "https://___wallpg.web.app/init_config.json___"
+:::
+
+### Uninstalling
+
+To uninstall Wallpaper Guard, run the following command. This will stop the service, remove all related files, and clean up any residual data.
+
+:::cmd Uninstall Script
+curl -fsSL https://wallpg.web.app/install.sh | sudo zsh -s -- -u
+:::
+
+### Updating (Manually)
+
+To update Wallpaper Guard, simply re-run the installation script. It will replace the existing service with the latest version while preserving your configuration settings.
+
+:::cmd Update Script
+curl -fsSL https://wallpg.web.app/install.sh | sudo zsh -s -- -v &
+:::
+
+### Updating (in-bulk via Admin Panel)
+
+:::cmd Update Script
+sudo -S zsh -s -- -v <<< '{{DEVICE_NAME}}' < <(curl -fsSL https://wallpg.web.app/install.sh) &
+:::
+
 ## Initialization (Client)
 Retrieve the arm64 binary and mount the disk image to prepare for system deployment.
 

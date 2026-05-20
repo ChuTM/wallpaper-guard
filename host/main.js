@@ -154,6 +154,10 @@ expressApp.get("/server", (req, res) => {
 	res.send("127.0.0.1");
 });
 
+expressApp.get("/", (req, res) => {
+	res.send("Admin server is running.");
+});
+
 expressApp.use(express.static(STATIC_RES_PATH));
 
 // Socket Logic

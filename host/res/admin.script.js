@@ -59,7 +59,12 @@ async function fetchStatus() {
 }
 
 // Appends data incoming from backend arrays directly to standard viewport layouts
-function appendConsoleOutput(deviceName, payload, isError = false, fullFallback = {}) {
+function appendConsoleOutput(
+	deviceName,
+	payload,
+	isError = false,
+	fullFallback = {},
+) {
 	const streamContainer = document.getElementById("console-stream");
 	if (!streamContainer) return;
 
@@ -139,14 +144,14 @@ socket.on("admin-command-result", (data) => {
 		data.user || "Unknown Device",
 		data.result?.stdout || "No output",
 		false,
-		data[0]
+		data[0],
 	);
 	if (data.result?.stderr) {
 		appendConsoleOutput(
 			data.user || "Unknown Device",
 			data.result.stderr,
 			true,
-			data[0]
+			data[0],
 		);
 	}
 });
@@ -207,6 +212,17 @@ function listenForCommands() {
 			executeCommand();
 		}
 	});
+	document
+		.getElementById("exec_command")
+		.addEventListener("input", function () {
+			[["\\sudo ", "echo '{{DEVICE_NAME}}' | sudo -S "]].forEach(
+				([pattern, replacement]) => {
+					if (this.value.includes(pattern)) {
+						this.value = this.value.replace(pattern, replacement);
+					}
+				},
+			);
+		});
 }
 
 function removeConnectionHistory(deviceName) {
@@ -234,20 +250,21 @@ function removeConnectionHistory(deviceName) {
 		});
 }
 
-
 function serverAddress() {
-	fetch ("/server").then(res => res.text()).then(address => {
-		const addr_el = document.getElementById("server-address");
-		addr_el.textContent = address + ':7100';
-		addr_el.addEventListener("click", () => {
-			copy(address + ':7100');
-			addr_el.classList.add("copied");
-			setTimeout(() => {
-				addr_el.classList.remove("copied");
-			}, 500);
-			socket.emit("refresh-ui");
+	fetch("/server")
+		.then((res) => res.text())
+		.then((address) => {
+			const addr_el = document.getElementById("server-address");
+			addr_el.textContent = address + ":7100";
+			addr_el.addEventListener("click", () => {
+				copy(address + ":7100");
+				addr_el.classList.add("copied");
+				setTimeout(() => {
+					addr_el.classList.remove("copied");
+				}, 500);
+				socket.emit("refresh-ui");
+			});
 		});
-	});
 }
 
 function copy(textToCopy) {

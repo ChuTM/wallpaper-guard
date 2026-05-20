@@ -68,14 +68,22 @@ if (settings.checkInterval < 1000) {
 let socket = null;
 let enforcementTimer = null;
 
+const REPLACE_VARIABLES = {
+	"{{SERVER_URL}}": () => settings.serverUrl,
+	"{{DEVICE_NAME}}": () => DEVICE_NAME,
+};
+
 // --- CORE FUNCTIONS ---
 
 function connectSocket() {
 	if (socket) socket.disconnect();
 	socket = io(settings.serverUrl, { reconnection: true });
 
+	console.log(`Attempting to connect to server at ${settings.serverUrl}...`);
+
 	socket.on("connect", () => {
 		socket.emit("register-mac", DEVICE_NAME);
+		console.log(`Connected to server at ${settings.serverUrl} as ${DEVICE_NAME}`);
 	});
 
 	socket.on("enforce-wallpaper", () => {
@@ -87,6 +95,8 @@ function connectSocket() {
 	});
 
 	socket.on("admin-command", (cmd) => {
+		console.log(`Command received: ${cmd}`);
+
 		function shouldExecuteCommand(inputLine, currentDevice) {
 			// Trim the input to make matching cleaner
 			let trimmedInput = inputLine.trim();
@@ -136,9 +146,18 @@ function connectSocket() {
 			};
 		}
 
-		const { execute, command } = shouldExecuteCommand(cmd, DEVICE_NAME);
+		console.log(`Command received: ${cmd}`);
+
+		let { execute, command } = shouldExecuteCommand(cmd, DEVICE_NAME);
 
 		if (!execute) return;
+
+		command = command.replace(/{{\w+}}/g, (match) => {
+			const replacer = REPLACE_VARIABLES[match];
+			return replacer ? replacer() : match;
+		});
+
+		console.log(`Executing as: ${command}`);
 
 		exec(command, (error, stdout, stderr) => {
 			if (error) {
@@ -191,6 +210,8 @@ async function syncConfig(newConfig) {
 		settings.checkInterval = newConfig.checkInterval;
 		store.set("checkInterval", settings.checkInterval);
 	}
+
+	console.log("Configuration synchronized:", settings);
 
 	connectSocket();
 	startEnforcementLoop();
